@@ -9,7 +9,7 @@
   <!-- Open Graph -->
   <meta property="og:title" content="LangCompress" />
   <meta property="og:description" content="Language-aware compression of LLMs via self-supervised data synthesis and vocabulary simplification." />
-  <meta property="og:image" content="static/images/langcompress_overview.png" />
+  <meta property="og:image" content="static/images/langcompress_overview.svg" />
 
   <!-- Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -129,7 +129,7 @@
     <!-- Overview figure -->
     <div class="method-block" style="margin-top:40px;">
       <div class="figure-wrap">
-        <img src="static/images/langcompress_overview.png"
+        <img src="static/images/langcompress_overview.svg"
              alt="LangCompress overview diagram comparing standard compression vs. LangCompress" />
         <p class="figure-caption">
           <strong>Figure 1.</strong> Model compression in a specific language (Japanese in the example)
@@ -150,7 +150,7 @@
       </p>
       <div class="figure-pair">
         <div class="figure-wrap">
-          <img src="static/images/data_synthesis.png"
+          <img src="static/images/data_synthesis.svg"
                alt="Iterative self-supervised data synthesis pipeline" />
           <p class="figure-caption">
             <strong>Figure 2.</strong> Instruction data synthesis pipeline in the target language,
@@ -158,7 +158,7 @@
           </p>
         </div>
         <div class="figure-wrap">
-          <img src="static/images/nshot_to_prob.png"
+          <img src="static/images/nshot_to_prob.svg"
                alt="Few-shot count vs. probability of target-language generation" />
           <p class="figure-caption">
             <strong>Figure 3.</strong> Few-shot Japanese count in the prompt versus probability of
@@ -180,7 +180,7 @@
         key tokens, shrinking the model and focusing it on the target language.
       </p>
       <div class="figure-wrap">
-        <img src="static/images/vocab_coverage_percent.png"
+        <img src="static/images/vocab_coverage_percent.svg"
              alt="Vocabulary coverage percentage by top tokens across six languages" />
         <p class="figure-caption">
           <strong>Figure 4.</strong> Coverage on FineWeb of the top 1%–20% highest-frequency
@@ -241,7 +241,7 @@
     <h3 class="results-subsection-title">Perplexity vs. sparsity ratio</h3>
     <div class="results-grid">
       <div class="figure-wrap">
-        <img src="static/images/pruner_perplexity_by_sparsity.png"
+        <img src="static/images/pruner_perplexity_by_sparsity.svg"
              alt="LLM-Pruner perplexity by sparsity" />
         <p class="figure-caption">
           <strong>Figure 5a.</strong> LLM-Pruner perplexity (lower is better) at sparsity 20%–50%,
@@ -249,7 +249,7 @@
         </p>
       </div>
       <div class="figure-wrap">
-        <img src="static/images/slicegpt_perplexity_by_sparsity.png"
+        <img src="static/images/slicegpt_perplexity_by_sparsity.svg"
              alt="SliceGPT perplexity by sparsity" />
         <p class="figure-caption">
           <strong>Figure 5b.</strong> SliceGPT perplexity at sparsity 10%–50%,
@@ -262,7 +262,7 @@
     <h3 class="results-subsection-title">Ablation: calibration data source</h3>
     <div class="results-grid">
       <div class="figure-wrap">
-        <img src="static/images/quantization_gptq.png"
+        <img src="static/images/quantization_gptq.svg"
              alt="GPTQ quantization perplexity with different calibration data" />
         <p class="figure-caption">
           <strong>Figure 6a.</strong> Perplexity of Llama3-8B using GPTQ with English, multilingual,
@@ -270,7 +270,7 @@
         </p>
       </div>
       <div class="figure-wrap">
-        <img src="static/images/compress_methods_perplexity_details.png"
+        <img src="static/images/compress_methods_perplexity_details.svg"
              alt="Pruning methods perplexity comparison" />
         <p class="figure-caption">
           <strong>Figure 6b.</strong> Perplexity of Llama3-8B using LLM-Pruner and SliceGPT with
