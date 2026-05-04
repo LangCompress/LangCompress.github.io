@@ -518,6 +518,13 @@ footer {
 .backbone-type.quantization    { background: #e8f0fe; color: #1a56db; }
 .backbone-type.semi-structured { background: #fef3c7; color: #92400e; }
 .backbone-type.structured      { background: #d1fae5; color: #065f46; }
+.backbone-type.extensible      { background: #ede9fe; color: #5b21b6; }
+
+.backbone-card-extensible {
+  border-style: dashed;
+  border-color: #c4b5fd;
+  background: #faf8ff;
+}
 
 .backbone-name {
   font-size: 1.1rem;
