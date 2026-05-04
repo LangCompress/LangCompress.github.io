@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LangCompress: Language-Aware Compression of Large Language Models</title>
+  <meta name="description" content="LangCompress is a language-aware compression framework that enhances pruning and quantization for targeted LLM deployment in specific languages." />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="LangCompress" />
+  <meta property="og:description" content="Language-aware compression of LLMs via self-supervised data synthesis and vocabulary simplification." />
+  <meta property="og:image" content="static/images/langcompress_overview.png" />
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="static/css/style.css" />
+
+  <!-- MathJax -->
+  <script>
+    window.MathJax = { tex: { inlineMath: [['$','$']] }, svg: { fontCache: 'global' } };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" defer></script>
+</head>
+<body>
+
+<!-- ══ Navigation ══════════════════════════════════════════ -->
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="#hero"><span>Lang</span>Compress</a>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="#abstract">Abstract</a></li>
+      <li><a href="#method">Method</a></li>
+      <li><a href="#results">Results</a></li>
+      <li><a href="#citation">Citation</a></li>
+    </ul>
+    <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle menu">
+      <i class="fa fa-bars"></i>
+    </button>
+  </div>
+</nav>
+
+<!-- ══ Hero ════════════════════════════════════════════════ -->
+<section id="hero">
+  <div class="container" style="text-align:center;">
+    <div class="venue-badge">IJCNLP-AACL 2025 &nbsp;·&nbsp; Mumbai, India</div>
+
+    <h1 class="hero-title">
+      <span class="highlight">LangCompress</span>: Language-Aware Compression of Large Language Models
+    </h1>
+
+    <p class="hero-authors">
+      Dieu-Hien Nguyen<sup>*</sup>&ensp;
+      Nguyen-Khang Le<sup>*</sup>&ensp;
+      Dinh-Truong Do&ensp;
+      Nguyen Le Minh
+    </p>
+    <p class="hero-affiliation">
+      <sup>*</sup>Equal contribution &nbsp;·&nbsp;
+      Japan Advanced Institute of Science and Technology (JAIST)
+    </p>
+
+    <div class="hero-stats">
+      <div class="stat-card">
+        <span class="stat-number">~5%</span>
+        <span class="stat-label">of vocabulary covers<br>&gt;95% of target language</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number">5</span>
+        <span class="stat-label">compression methods<br>supported</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number">6</span>
+        <span class="stat-label">target languages<br>evaluated</span>
+      </div>
+    </div>
+
+    <div class="hero-buttons">
+      <a class="btn btn-primary" href="https://aclanthology.org/2025.ijcnlp-long.112" target="_blank" rel="noopener">
+        <i class="fa fa-file-alt"></i> Paper
+      </a>
+      <a class="btn btn-secondary" href="https://github.com/LangCompress/lang-compress" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i> Code
+      </a>
+      <a class="btn btn-secondary" href="https://huggingface.co/LangCompress" target="_blank" rel="noopener">
+        🤗 Data &amp; Models
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ Abstract ════════════════════════════════════════════ -->
+<section id="abstract">
+  <div class="container">
+    <p class="section-eyebrow">Abstract</p>
+    <h2 class="section-title">TL;DR</h2>
+    <p class="abstract-text">
+      Large Language Models (LLMs) demonstrate strong multilingual capabilities but are costly to deploy
+      due to their size and computational demands. To mitigate this, compression techniques such as pruning
+      and quantization are widely used. However, these methods face two key limitations: (1) they assume
+      access to high-quality instruction or calibration data, which is often unavailable for low-resource
+      languages; and (2) they aim to preserve multilingual generality, making them inefficient for
+      language-specific applications.
+    </p>
+    <br />
+    <p class="abstract-text">
+      We introduce <strong>LangCompress</strong>, a language-aware compression framework that enhances
+      existing compression methods for targeted deployment. LangCompress is method-agnostic and improves
+      state-of-the-art pruning and quantization approaches. It features two core components: an iterative
+      self-supervised pipeline for generating instruction data in the target language, and a vocabulary
+      simplification strategy that reduces the LM head to focus on key tokens. Experiments on perplexity,
+      translation, and summarization tasks show that LangCompress improves performance in the target
+      language.
+    </p>
+  </div>
+</section>
+
+<!-- ══ Method ══════════════════════════════════════════════ -->
+<section id="method">
+  <div class="container">
+    <p class="section-eyebrow">Method</p>
+    <h2 class="section-title">How LangCompress works</h2>
+    <p class="section-subtitle">
+      Two complementary components tackle the data scarcity and vocabulary inefficiency challenges
+      that existing compression methods face in non-English languages.
+    </p>
+
+    <!-- Overview figure -->
+    <div class="method-block" style="margin-top:40px;">
+      <div class="figure-wrap">
+        <img src="static/images/langcompress_overview.png"
+             alt="LangCompress overview diagram comparing standard compression vs. LangCompress" />
+        <p class="figure-caption">
+          <strong>Figure 1.</strong> Model compression in a specific language (Japanese in the example)
+          using SOTA compression approach (top) and our LangCompress approach (bottom).
+        </p>
+      </div>
+    </div>
+
+    <!-- Component 1 -->
+    <div class="method-block">
+      <h3 class="method-block-title">① Self-Supervised Data Synthesis</h3>
+      <p class="method-block-text">
+        Existing compression methods require high-quality instruction or calibration data, which is
+        scarce for most non-English languages. LangCompress uses the LLM itself to iteratively
+        generate instruction data in the target language — no external resources required.
+        A few-shot prompting strategy and language filtering pipeline ensure the generated data is
+        both fluent and grammatically consistent in the target language.
+      </p>
+      <div class="figure-pair">
+        <div class="figure-wrap">
+          <img src="static/images/data_synthesis.png"
+               alt="Iterative self-supervised data synthesis pipeline" />
+          <p class="figure-caption">
+            <strong>Figure 2.</strong> Instruction data synthesis pipeline in the target language,
+            with an example of Japanese.
+          </p>
+        </div>
+        <div class="figure-wrap">
+          <img src="static/images/nshot_to_prob.png"
+               alt="Few-shot count vs. probability of target-language generation" />
+          <p class="figure-caption">
+            <strong>Figure 3.</strong> Few-shot Japanese count in the prompt versus probability of
+            Japanese instruction generation on Llama3-8B-Instruct.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Component 2 -->
+    <div class="method-block">
+      <h3 class="method-block-title">② Vocabulary Simplification</h3>
+      <p class="method-block-text">
+        Modern LLMs maintain a large vocabulary $\mathcal{V}$ covering many languages, but only a
+        tiny fraction of tokens is actually needed for any single language.
+        LangCompress identifies the core tokens: just <strong>5% of the vocabulary covers more than
+        95% of all tokens used in a target language</strong>. The LM head
+        $\mathbf{W}_\text{LM} \in \mathbb{R}^{|\mathcal{V}| \times d}$ is then reduced to these
+        key tokens, shrinking the model and focusing it on the target language.
+      </p>
+      <div class="figure-wrap">
+        <img src="static/images/vocab_coverage_percent.png"
+             alt="Vocabulary coverage percentage by top tokens across six languages" />
+        <p class="figure-caption">
+          <strong>Figure 4.</strong> Coverage on FineWeb of the top 1%–20% highest-frequency
+          vocabulary tokens, averaged across six languages: German, Spanish, French, Japanese,
+          Chinese, and Vietnamese.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ Results ══════════════════════════════════════════════ -->
+<section id="results">
+  <div class="container">
+    <p class="section-eyebrow">Results</p>
+    <h2 class="section-title">Consistent gains across methods &amp; languages</h2>
+    <p class="section-subtitle">
+      LangCompress is evaluated on six LLM families, five compression methods, and six languages
+      across perplexity, translation (FLORES), and summarization (MLSum) benchmarks.
+    </p>
+
+    <!-- Key highlights -->
+    <div style="margin-top:40px;">
+      <div class="result-highlight">
+        <div class="result-icon">📉</div>
+        <div>
+          <div class="result-highlight-title">Dramatic perplexity reduction</div>
+          <div class="result-highlight-text">
+            SliceGPT on Llama3-8B drops from ~65,000 perplexity to 37 on Japanese Wikitext.
+            SparseGPT on Japanese improves from 130 to 22. LangCompress delivers consistent
+            improvements across all compression methods and all six target languages.
+          </div>
+        </div>
+      </div>
+      <div class="result-highlight">
+        <div class="result-icon">🌐</div>
+        <div>
+          <div class="result-highlight-title">Translation &amp; summarization</div>
+          <div class="result-highlight-text">
+            BLEU scores on FLORES (en→target) and ROUGE-Lsum on MLSum both improve with LangCompress
+            calibration data, across German, Spanish, French, Japanese, and Vietnamese.
+          </div>
+        </div>
+      </div>
+      <div class="result-highlight">
+        <div class="result-icon">🔌</div>
+        <div>
+          <div class="result-highlight-title">Method-agnostic plug-in</div>
+          <div class="result-highlight-text">
+            LangCompress wraps around SliceGPT, LLM-Pruner (structured), SparseGPT 2:4
+            (semi-structured), GPTQ, and AWQ (quantization) without modifying their core algorithms.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Perplexity by sparsity -->
+    <h3 class="results-subsection-title">Perplexity vs. sparsity ratio</h3>
+    <div class="results-grid">
+      <div class="figure-wrap">
+        <img src="static/images/pruner_perplexity_by_sparsity.png"
+             alt="LLM-Pruner perplexity by sparsity" />
+        <p class="figure-caption">
+          <strong>Figure 5a.</strong> LLM-Pruner perplexity (lower is better) at sparsity 20%–50%,
+          with and without LangCompress recovery.
+        </p>
+      </div>
+      <div class="figure-wrap">
+        <img src="static/images/slicegpt_perplexity_by_sparsity.png"
+             alt="SliceGPT perplexity by sparsity" />
+        <p class="figure-caption">
+          <strong>Figure 5b.</strong> SliceGPT perplexity at sparsity 10%–50%,
+          with and without LangCompress recovery.
+        </p>
+      </div>
+    </div>
+
+    <!-- Ablation -->
+    <h3 class="results-subsection-title">Ablation: calibration data source</h3>
+    <div class="results-grid">
+      <div class="figure-wrap">
+        <img src="static/images/quantization_gptq.png"
+             alt="GPTQ quantization perplexity with different calibration data" />
+        <p class="figure-caption">
+          <strong>Figure 6a.</strong> Perplexity of Llama3-8B using GPTQ with English, multilingual,
+          and LangCompress-generated calibration data.
+        </p>
+      </div>
+      <div class="figure-wrap">
+        <img src="static/images/compress_methods_perplexity_details.png"
+             alt="Pruning methods perplexity comparison" />
+        <p class="figure-caption">
+          <strong>Figure 6b.</strong> Perplexity of Llama3-8B using LLM-Pruner and SliceGPT with
+          different recovery data sources.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ Citation ═════════════════════════════════════════════ -->
+<section id="citation">
+  <div class="container">
+    <p class="section-eyebrow">Citation</p>
+    <h2 class="section-title">If you find our work useful, please cite us</h2>
+    <div class="citation-box">
+      <button class="copy-btn" id="copy-btn">Copy</button>
+      <pre id="bibtex">@inproceedings{nguyen-etal-2025-langcompress,
+    title = "{L}ang{C}ompress: Language-Aware Compression of Large Language Models",
+    author = "Nguyen, Dieu-Hien  and
+      Le, Nguyen-Khang  and
+      Do, Truong Dinh  and
+      Nguyen, Le-Minh",
+    booktitle = "Proceedings of the 14th International Joint Conference on
+      Natural Language Processing and the 4th Conference of the
+      Asia-Pacific Chapter of the Association for Computational Linguistics",
+    month = dec,
+    year = "2025",
+    address = "Mumbai, India",
+    publisher = "The Asian Federation of Natural Language Processing and
+      The Association for Computational Linguistics",
+    pages = "2068--2077",
+    doi = "10.18653/v1/2025.ijcnlp-long.112"
+}</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ══ Footer ═══════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div>&copy; 2025 JAIST · LangCompress Authors</div>
+    <div class="footer-links">
+      <a href="https://aclanthology.org/2025.ijcnlp-long.112" target="_blank" rel="noopener">
+        <i class="fa fa-file-alt"></i> Paper
+      </a>
+      <a href="https://github.com/LangCompress/lang-compress" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i> Code
+      </a>
+      <a href="https://huggingface.co/LangCompress" target="_blank" rel="noopener">
+        🤗 HuggingFace
+      </a>
+    </div>
+  </div>
+</footer>
+
+<script src="static/js/main.js"></script>
+</body>
+</html>
