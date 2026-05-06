@@ -233,15 +233,53 @@
         rows corresponding to these key tokens.
       </p>
 
-      <div class="figure-wrap">
-        <img src="static/images/vocab_coverage_percent.svg"
-             alt="Top 5% of vocabulary tokens covers >95% of target-language text" />
-        <p class="figure-caption">
-          <strong>Figure 4.</strong> Coverage of the top 1%–20% highest-frequency vocabulary tokens
-          on FineWeb2, averaged across six languages. The top 5% of tokens covers over 95% of
-          target-language text — enabling aggressive LM head simplification without significant
-          information loss.
-        </p>
+      <div class="figure-pair">
+        <div class="figure-wrap">
+          <img src="static/images/vocab_coverage_percent.svg"
+               alt="Top 5% of vocabulary tokens covers >95% of target-language text" />
+          <p class="figure-caption">
+            <strong>Figure 4a.</strong> Coverage of the top 1%–20% tokens (FineWeb2, 6 languages).
+            The top 5% covers &gt;95% of target-language text.
+          </p>
+        </div>
+        <div class="figure-wrap">
+          <img src="static/images/simplify.svg"
+               alt="LM head weight matrix reduced from full vocabulary to key tokens" />
+          <p class="figure-caption">
+            <strong>Figure 4b.</strong> The LM head $\widetilde{\mathbf{W}}_{\text{LM}}$ retains
+            only the rows corresponding to the key token set
+            $\mathcal{V}_{\text{simplify}}$, reducing the projection matrix from
+            $|\mathcal{V}| \times d$ to $k \times d$.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pipeline integration -->
+    <div class="method-block">
+      <h3 class="method-block-title">Integration with any compression method</h3>
+      <p class="method-block-text">
+        The two components feed into standard compression pipelines without modifying the backbone
+        algorithm: the synthesized dataset $\mathcal{D}$ replaces English calibration data, and the
+        simplified LM head $\widetilde{\mathbf{W}}_{\text{LM}}$ replaces the original before compression.
+      </p>
+      <div class="figure-pair">
+        <div class="figure-wrap">
+          <img src="static/images/pruning_d.svg"
+               alt="LangCompress integration with pruning-based compression" />
+          <p class="figure-caption">
+            <strong>Pruning.</strong> $\mathcal{D}$ is used for calibration and recovery fine-tuning;
+            $\widetilde{\mathbf{W}}_{\text{LM}}$ is substituted before pruning.
+          </p>
+        </div>
+        <div class="figure-wrap">
+          <img src="static/images/quantization_d.svg"
+               alt="LangCompress integration with quantization-based compression" />
+          <p class="figure-caption">
+            <strong>Quantization.</strong> $\mathcal{D}$ serves as calibration data for weight
+            quantization; $\widetilde{\mathbf{W}}_{\text{LM}}$ is applied post-quantization.
+          </p>
+        </div>
       </div>
     </div>
   </div>
@@ -338,6 +376,50 @@
       </div>
     </div>
 
+    <!-- 4-task comparison overview -->
+    <h3 class="results-subsection-title">Consistent gains across 4 downstream tasks</h3>
+    <p class="method-block-text">
+      Evaluated on Llama-3-8B across all five compression methods. LangCompress improves over the
+      English-calibration baseline on every task — including translation and summarization, which
+      standard compression methods often reduce to near-zero.
+    </p>
+    <div class="results-grid">
+      <div class="figure-wrap">
+        <img src="static/images/perplexity_comparison.svg"
+             alt="Perplexity comparison: Base vs. LangCompress across 5 compression methods" />
+        <p class="figure-caption">
+          <strong>Perplexity</strong> (Wiki-text, lower is better). Consistent reduction across
+          all methods and languages.
+        </p>
+      </div>
+      <div class="figure-wrap">
+        <img src="static/images/translation_comparison.svg"
+             alt="Translation BLEU comparison: Base vs. LangCompress" />
+        <p class="figure-caption">
+          <strong>Translation</strong> (FLORES-200 BLEU, higher is better). Especially large gains
+          for structured pruning, which degrades to near-zero without LangCompress.
+        </p>
+      </div>
+    </div>
+    <div class="results-grid" style="margin-top:20px;">
+      <div class="figure-wrap">
+        <img src="static/images/summarization_comparison.svg"
+             alt="Summarization ROUGE-Lsum comparison: Base vs. LangCompress" />
+        <p class="figure-caption">
+          <strong>Summarization</strong> (MLSUM ROUGE-Lsum, higher is better). Stable improvements
+          across languages and all compression methods.
+        </p>
+      </div>
+      <div class="figure-wrap">
+        <img src="static/images/mtbench.svg"
+             alt="MT-Bench instruction following: SliceGPT on Llama-3-8B-Instruct" />
+        <p class="figure-caption">
+          <strong>Instruction following</strong> (MT-Bench, GPT-judged, 0–10). LangCompress
+          recovers multi-turn conversational ability after aggressive structured pruning.
+        </p>
+      </div>
+    </div>
+
     <!-- Perplexity across sparsity -->
     <h3 class="results-subsection-title">Consistent gains across sparsity levels</h3>
     <p class="method-block-text">
@@ -372,7 +454,7 @@
       alone. For quantization, using LangCompress instruction data also outperforms raw text
       corpora (e.g., C4) as calibration data.
     </p>
-    <div class="results-grid results-grid-ablation">
+    <div class="results-grid">
       <div class="figure-wrap">
         <img src="static/images/quantization_gptq.svg"
              alt="GPTQ perplexity with different calibration data sources" />
@@ -390,6 +472,38 @@
           simplification (full method).
         </p>
       </div>
+    </div>
+
+    <!-- Vocabulary size -->
+    <h3 class="results-subsection-title">Optimal vocabulary size</h3>
+    <p class="method-block-text">
+      Vocabulary size 32K is the sweet spot: smaller vocabularies lose coverage and hurt
+      performance; larger ones approach full-vocabulary cost with no quality gain. The optimal size
+      is consistent across compression methods and languages.
+    </p>
+    <div class="figure-wrap">
+      <img src="static/images/vocab_ablation.svg"
+           alt="Perplexity vs. vocabulary size for GPTQ, AWQ, SliceGPT on Llama-3-8B" />
+      <p class="figure-caption">
+        <strong>Figure 9.</strong> Perplexity vs. vocabulary size for three compression methods
+        (Llama-3-8B). 32K tokens consistently achieves the best trade-off across JA, ZH, VI.
+      </p>
+    </div>
+
+    <!-- Efficiency -->
+    <h3 class="results-subsection-title">Efficiency gains from LM head simplification</h3>
+    <p class="method-block-text">
+      Beyond accuracy, vocabulary simplification directly reduces inference cost. At 32K tokens,
+      the LM head runs 3.9× faster and uses 75% less memory. At 16K, speedup reaches 7.4× with
+      88% memory savings — measured on NVIDIA A100.
+    </p>
+    <div class="figure-wrap">
+      <img src="static/images/gpu_benchmark.svg"
+           alt="LM head inference time and memory footprint vs vocabulary size on NVIDIA A100" />
+      <p class="figure-caption">
+        <strong>Figure 10.</strong> LM head inference time (ms) and parameter count at different
+        vocabulary sizes (Llama-3-8B, NVIDIA A100). Consistent trend across A40, A6000, A100-80GB.
+      </p>
     </div>
   </div>
 </section>
